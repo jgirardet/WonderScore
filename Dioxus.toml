@@ -24,3 +24,8 @@ script = []
 [bundle]
 identifier = "fr.ijkl.wonderscore"
 publisher = "J.Girardet"
+icon = ["assets/icon-256.png"]
+copyright = "MIT"
+category = ""
+short_description = "Minimalist score counter for Seven Wonders"
+long_description = "Minimalist score counter for Seven Wonders"
