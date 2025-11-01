@@ -9,8 +9,8 @@ pub fn initial_width() -> Signal<u32> {
             let listener_script =
                 r#"dioxus.send(window.innerWidth);"#;
             let mut eval = document::eval(listener_script);            
-                if let Ok(x) = eval.recv::<i32>().await {                   
-                    width.set(2345)
+                if let Ok(x) = eval.recv::<u32>().await {                   
+                    width.set(x)
                 }
             
         });

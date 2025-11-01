@@ -1,17 +1,17 @@
 use dioxus::prelude::*;
 
 use crate::categorie::{Categorie, CATEGORIES};
-use crate::players::{Player, Players, Totaux};
+use crate::players::{Players, Totaux};
 use crate::utils::initial_width;
 
 #[component]
-pub fn TableauScore() -> Element {
+pub fn TableauScore(players: Signal<Players>) -> Element {
     let width = initial_width();
 
-    let mut players = use_signal(|| Players::new());
+
     rsx! {
         div {
-            class: "text-md sm:text-lg font-bold text-white px-2",
+            class: "text-md sm:text-lg font-bold text-white",
             background_color: "#ffffffff",
             LigneJoueurs {players}
             for categorie in CATEGORIES.iter() {
@@ -22,17 +22,7 @@ pub fn TableauScore() -> Element {
                 }
             }
             LigneTotal { totaux: players().totaux() }
-            button {
-                class: "btn btn-outline-danger",
-                onclick: move |_| {
-                    players.write().value.clear();
-                    players.write().value.push(Player::new("Papa", 1));
-                    players.write().value.push(Player::new("Maman", 2));
-                    players.write().value.push(Player::new("Axel", 3));
-                    players.write().value.push(Player::new("Margaux", 4));
-                },
-                "Reset"
-            }
+            
         }
     }
 }
@@ -52,13 +42,12 @@ fn TabCell(
     )
 }
 
-
 #[component]
-fn LigneJoueurs(players: ReadSignal<Players>)-> Element {
+fn LigneJoueurs(players: ReadSignal<Players>) -> Element {
     rsx!(
         div { id: "main", class: "flex h-20 gap-2 text-black items-center",
             Col0  {nb_players:players().len(),class:"opacity-0" ,"7️⃣"} // keep for alignment
-            for user in players.read().players() {
+            for user in players() {
                 div { id: "{user.id}", class: "flex-1 min-w-0 text-center",
                     div { class: "truncate", "{user.nom}" }
                 }
@@ -69,7 +58,6 @@ fn LigneJoueurs(players: ReadSignal<Players>)-> Element {
 
 #[component]
 fn LigneScore(width: u32, categorie: Categorie, players: Signal<Players>) -> Element {
-
     rsx!(
         div { class: "flex h-20", background_color: "{categorie.couleur}",
 
@@ -79,24 +67,22 @@ fn LigneScore(width: u32, categorie: Categorie, players: Signal<Players>) -> Ele
                     p { "{categorie.nom}" }
                 }
             }
-            for user in players().value {
+            for user in players(){
                 TabCell { categorie: categorie.clone(), class: "flex-1",
                     InputScore {
                         score: user.value(categorie.typ),
                         oninput: move |e: Event<FormData>| {
-                            if let Ok(val) = e.value().parse() {
+                            if let Ok(val) = e.value().parse::<i32>() {
                                 players.write().update(user.id, categorie.typ, val)
                             }
                         },
-                    
+
                     }
                 }
             }
         }
     )
 }
-
-
 
 #[component]
 fn InputScore(score: i32, oninput: EventHandler<FormEvent>) -> Element {
@@ -126,17 +112,14 @@ fn LigneTotal(totaux: Totaux) -> Element {
     )
 }
 
-
-
 #[component]
-fn Col0(nb_players:usize, class:Option<String>,  children:Element) -> Element {
-        let mut width = "w-30 sm:w-50";
-        if nb_players > 4 {
-        width =  "flex-shrink";
-        }
-        let c = class.unwrap_or_default();
-        rsx!(
-            div { class: "{width} sm:w-50 px-1 {c}", {children} }
-        )
-    
+fn Col0(nb_players: usize, class: Option<String>, children: Element) -> Element {
+    let mut width = "w-30 sm:w-50";
+    if nb_players > 4 {
+        width = "flex-shrink";
+    }
+    let c = class.unwrap_or_default();
+    rsx!(
+        div { class: "{width} sm:w-50 px-1 {c}", {children} }
+    )
 }

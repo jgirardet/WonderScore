@@ -1,9 +1,11 @@
+use derive_more::IntoIterator;
+
 use crate::{categorie::Categories};
 
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq)]
 pub struct Player {
-    pub id: i32,
+    pub id: usize,
     pub nom: String,
     pub guerre: i32,
     pub bleu: i32,
@@ -15,7 +17,7 @@ pub struct Player {
 }
 
 impl Player {
-    pub fn new(name: &str, id: i32) -> Player {
+    pub fn new(name: &str, id: usize) -> Player {
         Player {
             id,
             nom: name.to_string(),
@@ -64,33 +66,29 @@ impl Player {
     }
 }
 
-#[derive(Clone)]
-pub struct Players {
-    pub(crate) value: Vec<Player>,
-}
+#[derive(Clone, IntoIterator, PartialEq)]
+pub struct Players(pub Vec<Player>);
 
 impl Players {
 
-    pub fn new() -> Players {
-        Players {
-        value: vec![
-            Player::new("Papa", 1),
-            Player::new("Maman", 2),
-            Player::new("Axel1234567", 3),
-            Player::new("Margaux", 4),
-            Player::new("Margaux5", 5),
-            // Player::new("Margaux6", 6),
-            // Player::new("Margaux7", 7),
-        ],
+    pub fn new(nb: usize) -> Players {
+        let mut noms = vec!["Papa", "Maman", "Axel", "Margaux", "Joueur5", "Joueur6", "Joueur7"];
+        noms.truncate(nb);
+        Players(noms.into_iter().enumerate().map(|(idx, p)| Player::new(p, idx)).collect())
+    
     }
+
+    pub fn reset(&self) -> Players {
+        Players::new(self.len())
     }
+
     pub fn totaux(&self) -> Totaux {
-        self.value.iter().map(|p| p.total()).collect()
+        self.0.iter().map(|p| p.total()).collect()
         
     }
 
-    pub fn update(&mut self, user_id: i32, cate: Categories, value: i32) {
-        for p in self.value.iter_mut() {
+    pub fn update(&mut self, user_id: usize, cate: Categories, value: i32) {
+        for p in self.0.iter_mut() {
             if p.id == user_id {
                 p.set(cate, value);
                 return;
@@ -99,12 +97,10 @@ impl Players {
     }
 
     pub fn len(&self) -> usize {
-        return self.value.len();
+        self.0.len()
     }
 
-    pub fn players(&self) -> Vec<Player> {
-        self.value.clone()
-    }
+    
 }
 
 pub type Totaux = Vec<i32>;
